@@ -2,56 +2,108 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test Chat Toggle</title>
+<title>Jonathan Rose – Portfolio AI Agent</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { font-family: sans-serif; }
+  body { font-family: sans-serif; margin: 0; }
   .jr-chat-launcher {
     position: fixed; bottom: 20px; right: 20px;
     width: 56px; height: 56px; border-radius: 50%;
     background: #0f766e; color: #fff; display: flex;
     align-items: center; justify-content: center;
     cursor: pointer; border: none; font-weight: bold;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
     z-index: 9999;
   }
   .jr-chat-window {
     position: fixed; bottom: 88px; right: 20px;
-    width: 360px; height: 520px; background: #fff;
-    border: 1px solid #ccc; border-radius: 10px;
+    width: 360px; max-width: calc(100vw - 40px);
+    height: 520px; max-height: calc(100vh - 120px);
+    background: #fff; border: 1px solid #ccc; border-radius: 10px;
     display: none; flex-direction: column;
     z-index: 10000; box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    overflow: hidden;
   }
+  .jr-chat-header {
+    background: linear-gradient(135deg, #0f766e, #115e59);
+    color: #fff; padding: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .jr-header-left { display: flex; align-items: center; gap: 10px; }
+  .jr-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: #0d9488;
+    display: inline-flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .jr-title-text { display: flex; flex-direction: column; font-size: 13px; }
+  .jr-actions a {
+    background: rgba(255,255,255,0.12); color: #fff;
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 8px; padding: 4px 6px;
+    font-size: 12px; text-decoration: none;
+  }
+  .jr-close {
+    background: none; border: none; color: #fff;
+    font-size: 20px; cursor: pointer;
+  }
+  .jr-chat-body { flex: 1; overflow: hidden; }
 </style>
 </head>
 <body>
 
+<!-- Floating launcher -->
 <button class="jr-chat-launcher">JR</button>
 
+<!-- Chat window -->
 <div class="jr-chat-window">
-  <div style="background:#0f766e;color:white;padding:10px;display:flex;justify-content:space-between;align-items:center;">
-    <strong>Jonathan's AI Chat</strong>
-    <button id="jr-close" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">×</button>
+  <div class="jr-chat-header">
+    <div class="jr-header-left">
+      <div class="jr-avatar">JR</div>
+      <div class="jr-title-text">
+        <strong>Jonathan Rose</strong>
+        <span>Portfolio AI</span>
+      </div>
+    </div>
+    <div class="jr-actions">
+      <a href="/Jonathan_Rose_CV_2025.pdf" target="_blank">CV</a>
+      <a href="mailto:Jonathan.Rose@cinci.rr.com?subject=Portfolio%20Inquiry">Email</a>
+      <a href="https://www.linkedin.com/in/jrose2014" target="_blank">LinkedIn</a>
+    </div>
+    <button id="jr-close" class="jr-close" title="Close">×</button>
   </div>
-  <div style="flex:1;padding:10px;">
-    <p>Chat content will go here…</p>
-  </div>
+  <div class="jr-chat-body" id="jr-chat-body"></div>
 </div>
 
+<!-- Botpress inject -->
+<script src="https://cdn.botpress.cloud/webchat/v3.2/inject.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function(){
-    const launcher = document.querySelector(".jr-chat-launcher");
-    const chatWin = document.querySelector(".jr-chat-window");
-    const closeBtn = document.getElementById("jr-close");
-
-    launcher.addEventListener("click", () => {
-      console.log("Launcher clicked");
-      chatWin.style.display = "flex";
-    });
-
-    closeBtn.addEventListener("click", () => {
-      chatWin.style.display = "none";
-    });
+document.addEventListener("DOMContentLoaded", function() {
+  // Inject Botpress Webchat inside our body container
+  window.botpressWebChat.init({
+    configUrl: "https://files.bpcontent.cloud/2025/08/23/18/20250823184746-X0OTQ21K.json",
+    container: document.getElementById("jr-chat-body"),
+    hideWidget: true
   });
+
+  const launcher = document.querySelector(".jr-chat-launcher");
+  const chatWin = document.querySelector(".jr-chat-window");
+  const closeBtn = document.getElementById("jr-close");
+
+  launcher.addEventListener("click", () => {
+    chatWin.style.display = "flex";
+    setTimeout(() => {
+      const bpFrame = document.querySelector("#jr-chat-body iframe");
+      if (bpFrame) {
+        bpFrame.style.width = "100%";
+        bpFrame.style.height = "100%";
+        bpFrame.style.border = "0";
+      }
+    }, 500);
+  });
+
+  closeBtn.addEventListener("click", () => {
+    chatWin.style.display = "none";
+  });
+});
 </script>
 
 </body>
