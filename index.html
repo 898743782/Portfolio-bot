@@ -33,15 +33,7 @@
   }
   .jr-close { position: absolute; right: 10px; top: 10px; background: transparent; border: none;
               color: #fff; font-size: 18px; cursor: pointer; }
-  .jr-chat-body { padding: 12px; background: #f8fafc; flex: 1; overflow-y: auto; }
-  .jr-msg { display: flex; margin: 8px 0; gap: 8px; }
-  .jr-msg.bot .jr-bubble { background: #ffffff; border: 1px solid #e5e7eb; color: #0f172a; }
-  .jr-msg.user { justify-content: flex-end; }
-  .jr-msg.user .jr-bubble { background: #0f766e; color: white; border: 1px solid #0f766e; }
-  .jr-bubble { padding: 10px 12px; border-radius: 12px; max-width: 80%; font-size: 14px; line-height: 1.35; }
-  .jr-chat-input { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e5e7eb; background: #ffffff; }
-  .jr-chat-input input { flex: 1; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; }
-  .jr-chat-input button { background: #0f766e; color: #fff; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+  .jr-chat-body { flex: 1; overflow-y: auto; }
 </style>
 </head>
 <body>
@@ -63,89 +55,38 @@
     <button class="jr-close" title="Close">×</button>
   </div>
   <div class="jr-chat-body" id="jr-chat-body"></div>
-  <div class="jr-chat-input">
-    <input id="jr-input" type="text" placeholder="Ask me about my experience, leadership, or publications…" />
-    <button id="jr-send">Send</button>
-  </div>
 </div>
 
+<!-- Botpress Webchat inject -->
+<script src="https://cdn.botpress.cloud/webchat/v3.2/inject.js"></script>
 <script>
-(() => {
-  const USE_BACKEND = true;
-  const BOT_ID = "01e6f045-5ca9-4e8a-bfb0-f955510937b5"; // your bot ID
+  // Mount Botpress into our panel body
+  window.botpressWebChat.init({
+    configUrl: "https://files.bpcontent.cloud/2025/08/23/18/20250823184746-X0OTQ21K.json",
+    container: document.getElementById("jr-chat-body"),
+    hideWidget: true
+  });
 
+  // Bubble open/close logic
   const launcher = document.querySelector(".jr-chat-launcher");
   const win = document.querySelector(".jr-chat-window");
-  const body = document.getElementById("jr-chat-body");
-  const input = document.getElementById("jr-input");
-  const send = document.getElementById("jr-send");
   const closeBtn = document.querySelector(".jr-close");
-
-  function msgEl(kind, text) {
-    const row = document.createElement("div");
-    row.className = "jr-msg " + kind;
-    const bubble = document.createElement("div");
-    bubble.className = "jr-bubble";
-    bubble.textContent = text;
-    row.appendChild(bubble);
-    return row;
-  }
 
   function openChat() {
     win.style.display = "flex";
-    body.innerHTML = "";
-    body.appendChild(msgEl("bot", "Hi — I’m Jonathan’s portfolio AI. Ask me about CRA work, leadership, therapeutic coverage, systems, publications, or more."));
-    body.scrollTop = body.scrollHeight;
-    input.focus();
+    setTimeout(() => {
+      const iframe = document.querySelector("#jr-chat-body iframe");
+      if (iframe) {
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "0";
+      }
+    }, 500);
   }
-
   function closeChat() { win.style.display = "none"; }
-
-  async function backendAnswer(userText) {
-    try {
-      const res = await fetch(`https://api.botpress.cloud/v1/chat/${BOT_ID}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "text", text: userText })
-      });
-
-      if (!res.ok) throw new Error("Botpress error");
-      const data = await res.json();
-      return Array.isArray(data) ? (data[0]?.text || "") : (data.text || "");
-    } catch (err) {
-      console.error(err);
-      return "Sorry — I couldn’t reach my Botpress brain right now.";
-    }
-  }
-
-  async function handleSend() {
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-    body.appendChild(msgEl("user", text));
-    body.scrollTop = body.scrollHeight;
-
-    const typing = msgEl("bot", "…");
-    body.appendChild(typing);
-    body.scrollTop = body.scrollHeight;
-
-    let reply;
-    if (USE_BACKEND) {
-      reply = await backendAnswer(text);
-    } else {
-      reply = "Local fallback: backend disabled.";
-    }
-
-    typing.remove();
-    body.appendChild(msgEl("bot", reply || "No response."));
-    body.scrollTop = body.scrollHeight;
-  }
 
   launcher.addEventListener("click", openChat);
   closeBtn.addEventListener("click", closeChat);
-  send.addEventListener("click", handleSend);
-  input.addEventListener("keydown", (e) => { if (e.key === "Enter") handleSend(); });
-})();
 </script>
 
 </body>
